@@ -10,6 +10,7 @@ library(dplyr)
 library(readr)
 library(stringr)
 #library(zoo)
+library(lubridate)
 
 # Scrapes CRAN archives to determine the number of packages per release
 
@@ -33,16 +34,54 @@ tmpPT2 <- as.data.frame(str_locate(htmlText$htmlText, "</a>"))
 htmlText <- mutate(htmlText, version=str_trim(str_sub(htmlText$htmlText, tmpPT1$end + 2, tmpPT2$start-8)))
 htmlText <- mutate(htmlText, nchar=nchar(htmlText$version))
 
+htmlText$version[htmlText$nchar==5] <- str_sub(htmlText$version[htmlText$nchar==5], 1, 4)
+
+rm("tmpPT1", "tmpPT2")
+
+folderURLs <- as.data.frame(matrix(nrow = nrow(htmlText), ncol = 1))
+
+for(x in 1:nrow(folderURLs)){
+     folderURLs[x,1] <- paste0(urls[[1]], htmlText[x,2])
+}
+
+folderHMTL <-  read_lines(folderURLs[1,1])
+folderHMTL <- folderHMTL[13:length(folderHMTL)-3]
+#Need to get package name and date
+tmpPT1 <- as.data.frame(str_locate(htmlText$htmlText, "href="))
+tmpPT2 <- as.data.frame(str_locate(htmlText$htmlText, "</a>"))
+tmpPT1 <- as.data.frame(str_locate(htmlText$htmlText, "align=\"right\">"))
+
+#############################
+readByDate <- read_lines("https://cran.r-project.org/web/packages/available_packages_by_date.html")
+readByDate <- readByDate[18:length(readByDate)-3]
+readByDate <- as.data.frame(readByDate)
+
+tmpBool <- str_detect(readByDate$readByDate, "<tr> <td>")
+
+readByDate <- data_frame(readByDate[tmpBool,])
+names(readByDate) <- c("rawHTML")
+readByDate$rawHTML <- as.character(readByDate$rawHTML)
+
+cntDatesDF <- data.frame(matrix(nrow=0, ncol=1))
+colnames(cntDatesDF) <- c("Date")
+
+#Need the dates for each package.  The we can count how many by date
+for(x in 1:nrow(readByDate)){
+     cntDatesDF[x,1] <- substr(readByDate[x,1],11, 20)
+}
+cntDatesDF$Date <- ymd(cntDatesDF$Date)
+cntDatesDF <- arrange(cntDatesDF, Date)
+head(cntDatesDF,1)
+tail(cntDatesDF,1)
+nrow(cntDatesDF)
 
 
 
 
-rm(htmlText)
 
-folderURLs <- data_frame(matrix(nrow = length(tmpPT), ncol = 1))
 
-DailyDF <- data.frame(matrix(nrow=0, ncol=2))
-# colnames(DailyDF) <- c("Date", "Pct_Error")
+
+#############################
 
 #-----
 extract_url <- function() {
@@ -60,6 +99,8 @@ extract_url <- function() {
      z <- lapply(url, get_urls)
      unname(unlist(z))
 }
+
+
 
 
 # Given a CRAN URL, extract the number of packages and date
