@@ -3,7 +3,8 @@
 #http://blog.revolutionanalytics.com/2016/04/cran-package-growth.html
 #
 #Update with this: https://www.r-bloggers.com/scraping-cran-with-rvest/?utm_source=feedburner&utm_medium=email&utm_campaign=Feed%3A+RBloggers+%28R+bloggers%29
-
+#aand with this https://rpubs.com/Radcliffe/superbowl
+#
 library(rvest)
 #library(magrittr)
 library(ggplot2)
