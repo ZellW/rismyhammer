@@ -1,0 +1,80 @@
+---
+title: "Count R Packages"
+output: html_document
+---
+
+The code counts how many packages are in the CRAN Repository.  This code is presented to be copied and used as a learnnig tool (that's why I offer 2 different ways to get to the same result).  This code is a companion to my first blog on [R is my hammer blog](http://www.rismyhammer.com/r-v-python/).
+
+##Foolish First Attempt
+
+Have you ever tried to dig a hole without a shovel because you simply -and ignorantly - thought you could do it quickly without it?  Well, that describes my fisrt effort to count the number of R packages.
+
+As you will learn, there are a few R packages that you will use all the time.  Each time you bypass the opportunity to use them, you will waste time.  I'll prove this below.
+
+Remember, R can do anything - that's why it is my hammer.  Fortunately, it cannot only do almost anything you want, most of the time it does it very well.  Scraping web information is a good example.
+
+Commonly, you willl load packages you know you will need.  Don't worry, you will learn these by heart as you use R.  Here is just one example - `reader`.  `readr` makes it easy to read many types of rectangular data, including csv, tsv and fixed-width files. Compared to R base equivalents like read.csv(), readr is much faster and gives more convenient output.  Do yourself a favor and always include `readr` in your R scripts.  Just do it now and you'll thank me later.
+
+We are going to scrape the CRAN page with a list of the available packages.  You can find it [here](https://cran.r-project.org/web/packages/available_packages_by_date.html).  If you are lazy like me (R makes me seem super productive at work), here is a picture of what you would see:
+
+![](../images/CRAN_pkgs.JPG)
+
+Let's get started.  We'll load `readr` and use its function `read_lines` to *read* the CRAN Package URL.  We then see how long the list is by using the `length' funtion in base R:
+
+```{r}
+library(readr)
+readByDate <- read_lines("https://cran.r-project.org/web/packages/available_packages_by_date.html")
+length(readByDate)
+```
+We now know there are 12,356 lines on HTML on the CRAN Package page.  But is all of that code useful to us?  Of course not.  We do not need anything but the table.  So the code in the beginning and at the end can be ignored.  Here's some of the extraneous code at the beginning:
+```{r}
+head(readByDate,3)
+```
+and here's some code we do not need at the end:
+```{r}
+readByDate[12353:12356]
+```
+So now we will get the code of interest that includes the information about the CRAN Packages.  To make sure it all looks right, let's also look at the fisrt and last line of the file we have created:
+
+```{r}
+readByDate <- readByDate[18:length(readByDate)-3]
+readByDate[1]
+readByDate[length(readByDate)]
+```
+
+OK, everything looks OK.  We have scraped the CRAN site and pasrser the HTML code to the line we are interested in.  Now we start using some R code.  I know this might be one of your first introductions to R so I will probably use some terms that are new to you.  Sorry about that!  To keep this post small, rather than explain each term, I'll provide you links where you can learn more.  Do not get to concerned about this.  I promise you will know all this and more if you follow by blog!
+
+The fist of these concepts is critcally importnt to the world of R - data frames.  A data frame is R’s standard container for data. It is extremely flexible: variables can be numeric, character or factors, or indeed any data type supported by the system. The only constraint is that all variables in the data frame must have the same number of rows. You will become very familiar with data frames.  In fact, you will use them every time you use R!
+
+
+
+```{r}
+readByDate <- data.frame(readByDate, stringsAsFactors = FALSE )
+tmpBool <- str_detect(readByDate$readByDate, "<tr> <td>")
+
+readByDate <- data_frame(readByDate[tmpBool,])
+names(readByDate) <- c("rawHTML")
+readByDate$rawHTML <- as.character(readByDate$rawHTML)
+
+cntDatesDF <- data.frame(matrix(nrow=0, ncol=1))
+colnames(cntDatesDF) <- c("Date")
+
+#Need the dates for each package.  Then we can count how many by date
+for(x in 1:nrow(readByDate)){cntDatesDF[x,1] <- substr(readByDate[x,1],11, 20)}
+
+cntDatesDF$Date <- ymd(cntDatesDF$Date)
+cntDatesDF <- arrange(cntDatesDF, Date)
+head(cntDatesDF,1)
+tail(cntDatesDF,1)
+nrow(cntDatesDF)
+```
+
+
+```{r}
+pkgs <- "https://cran.r-project.org/web/packages/available_packages_by_date.html"
+pkgs_raw <- read_html(pkgs) %>% 
+     html_nodes("table") %>% 
+     .[[1]] %>%
+     html_table()
+```
+
