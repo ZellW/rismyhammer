@@ -1,6 +1,8 @@
 #https://cran.r-project.org/web/packages/available_packages_by_date.html
 #https://cran.r-project.org/web/packages/available_packages_by_name.html
 #http://blog.revolutionanalytics.com/2016/04/cran-package-growth.html
+#
+#Update with this: https://www.r-bloggers.com/scraping-cran-with-rvest/?utm_source=feedburner&utm_medium=email&utm_campaign=Feed%3A+RBloggers+%28R+bloggers%29
 
 library(rvest)
 #library(magrittr)
