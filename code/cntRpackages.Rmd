@@ -86,7 +86,7 @@ Even if the code does not make sense to you, the logic we used as pretty simple.
 
 Recall  the beginning of this document when I stated there is an R package for everything and often these tools make things easier?  Well, like always, it is true in the case too.
 
-The [rvest package](https://cran.r-project.org/web/packages/rvest/rvest.pdf) provides all the functionality to answer our question - *How namy R packages are there?* in 1 line of code (after loading the package and identifying the URL):
+The [rvest package](https://cran.r-project.org/web/packages/rvest/rvest.pdf) provides all the functionality to answer our question - *How many R packages are there?* in 1 line of code (after loading the package and identifying the URL):
 
 ```{r rvestCode, warning=FALSE, message=FALSE}
 library(rvest)

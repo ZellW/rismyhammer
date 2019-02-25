@@ -140,8 +140,8 @@ $(document).ready(function () {
 <pre class="r"><code>library(readr)
 readByDate &lt;- read_lines(&quot;https://cran.r-project.org/web/packages/available_packages_by_date.html&quot;)
 length(readByDate)</code></pre>
-<pre><code>## [1] 12509</code></pre>
-<p>We now know there are 12509 lines on HTML on the CRAN Package page. But is all of that code useful to us? Of course not. We do not need anything but the table. So the code in the beginning and at the end can be ignored. Here’s some of the extraneous code at the beginning:</p>
+<pre><code>## [1] 12530</code></pre>
+<p>We now know there are 12530 lines on HTML on the CRAN Package page. But is all of that code useful to us? Of course not. We do not need anything but the table. So the code in the beginning and at the end can be ignored. Here’s some of the extraneous code at the beginning:</p>
 <pre class="r"><code>head(readByDate,3)</code></pre>
 <pre><code>## [1] &quot;&lt;!DOCTYPE html PUBLIC \&quot;-//W3C//DTD XHTML 1.0 Strict//EN\&quot; \&quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\&quot;&gt;&quot;
 ## [2] &quot;&lt;html xmlns=\&quot;http://www.w3.org/1999/xhtml\&quot;&gt;&quot;                                                                    
@@ -152,7 +152,7 @@ length(readByDate)</code></pre>
 <p>So now we will get the code of interest that includes the information about the CRAN Packages. To make sure it all looks right, let’s also look at the first and last line of the file we have created:</p>
 <pre class="r"><code>readByDate &lt;- readByDate[18:length(readByDate)-3]
 readByDate[1]</code></pre>
-<pre><code>## [1] &quot;&lt;tr&gt; &lt;td&gt; 2017-04-07 &lt;/td&gt; &lt;td&gt; &lt;a href=\&quot;../../web/packages/beyondWhittle/index.html\&quot;&gt;beyondWhittle&lt;/a&gt; &lt;/td&gt; &lt;td&gt; Bayesian Spectral Inference for Stationary Time Series &lt;/td&gt; &lt;/tr&gt;&quot;</code></pre>
+<pre><code>## [1] &quot;&lt;tr&gt; &lt;td&gt; 2017-04-10 &lt;/td&gt; &lt;td&gt; &lt;a href=\&quot;../../web/packages/berryFunctions/index.html\&quot;&gt;berryFunctions&lt;/a&gt; &lt;/td&gt; &lt;td&gt; Function Collection Related to Plotting and Hydrology &lt;/td&gt; &lt;/tr&gt;&quot;</code></pre>
 <pre class="r"><code>readByDate[length(readByDate)]</code></pre>
 <pre><code>## [1] &quot;&lt;tr&gt; &lt;td&gt; 2005-10-29 &lt;/td&gt; &lt;td&gt; &lt;a href=\&quot;../../web/packages/vioplot/index.html\&quot;&gt;vioplot&lt;/a&gt; &lt;/td&gt; &lt;td&gt; Violin plot &lt;/td&gt; &lt;/tr&gt;&quot;</code></pre>
 <p>OK, everything looks OK. We have scraped the CRAN site and parsed the HTML code to the line we are interested in. Now we start using some R code. I know this might be one of your first introductions to R so I will probably use some terms that are new to you. Sorry about that! To keep this post small, rather than explain each term, I’ll provide you links where you can learn more. Do not get to concerned about this. I promise you will know all this and more if you follow my blog!</p>
@@ -162,12 +162,12 @@ readByDate[1]</code></pre>
 <p>We can now look at the data frame (notice I load a library to assist. Was this really needed below - no. But I have gotten into the habit to using the <code>dplyr</code> library whenever I can:</p>
 <pre class="r"><code>library(dplyr)
 glimpse(readByDate)</code></pre>
-<pre><code>## Observations: 12,492
+<pre><code>## Observations: 12,513
 ## Variables: 1
-## $ readByDate &lt;chr&gt; &quot;&lt;tr&gt; &lt;td&gt; 2017-04-07 &lt;/td&gt; &lt;td&gt; &lt;a href=\&quot;../../we...</code></pre>
+## $ readByDate &lt;chr&gt; &quot;&lt;tr&gt; &lt;td&gt; 2017-04-10 &lt;/td&gt; &lt;td&gt; &lt;a href=\&quot;../../we...</code></pre>
 <p>Whenever importing data, you must review it carefully. There are always surprises. (This will be a topic for another blog entry). The data we have has problems. Let’s look at one example:</p>
 <pre class="r"><code>readByDate[8,1]</code></pre>
-<pre><code>## [1] &quot;Diet &lt;/td&gt; &lt;/tr&gt;&quot;</code></pre>
+<pre><code>## [1] &quot;&lt;tr&gt; &lt;td&gt; 2017-04-10 &lt;/td&gt; &lt;td&gt; &lt;a href=\&quot;../../web/packages/easySdcTable/index.html\&quot;&gt;easySdcTable&lt;/a&gt; &lt;/td&gt; &lt;td&gt; Easy Interface to the Statistical Disclosure Control Package&quot;</code></pre>
 <p>We are interested in records that begin with the HTML tags <code>&lt;tr&gt; &lt;td&gt;</code> only. Therefore, we will create a list of Boolean (TRUE or FALSE) values where TRUE indicates the record in the data frame begins with the HTML tags we expect.</p>
 <pre class="r"><code>library(stringr)
 tmpBool &lt;- str_detect(readByDate$readByDate, &quot;&lt;tr&gt; &lt;td&gt;&quot;)</code></pre>
@@ -175,15 +175,15 @@ tmpBool &lt;- str_detect(readByDate$readByDate, &quot;&lt;tr&gt; &lt;td&gt;&quot
 <pre class="r"><code>readByDate &lt;- data_frame(readByDate[tmpBool,])</code></pre>
 <p>We’re done! All we need to do is count how many records remain:</p>
 <pre class="r"><code>nrow(readByDate)</code></pre>
-<pre><code>## [1] 10402</code></pre>
-<p>So we now know there are 10402 R packages.</p>
+<pre><code>## [1] 10418</code></pre>
+<p>So we now know there are 10418 R packages.</p>
 <p>Even if the code does not make sense to you, the logic we used as pretty simple. All we did was count how many records in an HTML start with specific HTML tags. The code works, but. . . was it the most efficient method? No, not even close.</p>
 <p>Recall the beginning of this document when I stated there is an R package for everything and often these tools make things easier? Well, like always, it is true in the case too.</p>
 <p>The <a href="https://cran.r-project.org/web/packages/rvest/rvest.pdf">rvest package</a> provides all the functionality to answer our question - <em>How namy R packages are there?</em> in 1 line of code (after loading the package and identifying the URL):</p>
 <pre class="r"><code>library(rvest)
 pkgs &lt;- &quot;https://cran.r-project.org/web/packages/available_packages_by_date.html&quot;
 pkgs_raw &lt;- read_html(pkgs) %&gt;% html_nodes(&quot;table&quot;) %&gt;% .[[1]] %&gt;% html_table()</code></pre>
-<p>Using rvest, the number of records is 10402 - the same number we calculated before!</p>
+<p>Using rvest, the number of records is 10418 - the same number we calculated before!</p>
 <p>Again, if there is a package that meets your needs - use it. It will save time and effort every time!</p>
 <blockquote>
 <p>FYI: If you run this code in RStudio, you’ll find that my code runs much faster than the <code>rvest</code> code. I guess sometimes there is a tradeoff between simplicity and performance.</p>
